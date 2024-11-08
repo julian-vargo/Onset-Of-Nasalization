@@ -9,10 +9,10 @@ writeInfoLine: "Initializing Onset of Nasalization Detector"
 appendInfoLine: newline$, "Vargo, Julian (2024). Onset of Nasalization Detector [Computer Software]"
 appendInfoLine: "University of California, Berkeley. Department of Spanish & Portuguese"
 appendInfoLine: "Script is loading. This may take a minute. Please stand by."
-inputFolder$ = "C:\Users\julia\Documents\Test_SRT\small_dataset"
+inputFolder$ = "C:\Users\julia\Documents\Test_SRT\praat_mass_analyzer"
 
 #Create initial csv file, open up file list, and calculate the number of TextGrids in the input folder
-writeFileLine: "C:\Users\julia\Documents\Test_SRT\Nasalization_Data.csv", "phoneme,following_phone,vowel_duration,percentage_nasalized,nasalization_percentile,onset_confidence,vowel_start,vowel_end"
+writeFileLine: "C:\Users\julia\Documents\Test_SRT\Nasalization_Data.csv", "phoneme,following_phone,vowel_duration,percentage_nasalized,nasalization_percentile,onset_confidence,vowel_start,vowel_end,disFromMean_maxddtf1bw,disFromMean_maxddta1p0,disFromMean_maxstd01k"
 fileList = Create Strings as file list: "fileList", inputFolder$ + "\" +"*.TextGrid"
 numberOfFiles = Get number of strings
 
@@ -32,6 +32,7 @@ globalFormant = To Formant (burg)... 0 5 5500 0.025 50
 select Sound 'currentSound$'
 globalPitch = To Pitch... 0 75 600
 intervalNumber = 1
+fileSoundChunkName$ = currentFile$ + "_part"
 
 #Start the second-layer for loop, where each prenasal vowel interval is scanned for and then analyzed
 for thisInterval from intervalNumber to numberOfPhonemes
@@ -86,62 +87,72 @@ if followingPhoneme$ = "N" or followingPhoneme$ = "M" or followingPhoneme$ = "NG
         currentf0$ = fixed$(currentf0, 10)
         p0_filterLowerBound$ = fixed$(p0_filterLowerBound, 10)
         p0_filterUpperBound$ = fixed$(p0_filterUpperBound, 10)
-        appendInfoLine: p0_filterLowerBound
 
         if p0_filterLowerBound$ <> "--undefined--"
         selectObject: currentSound
         currentSoundChunk = Extract part... previousTime nextTime rectangular 1 on
-        currentSoundChunk = Filter (pass Hann band)... p0_filterLowerBound p0_filterUpperBound 1
+        selectObject: currentSoundChunk
+        currentSoundChunk2 = Filter (pass Hann band)... p0_filterLowerBound p0_filterUpperBound 1
         currentIntensity = To Intensity... mockLowerBound 0 yes
         p0 [i] = Get maximum... previousTime nextTime sinc70
         removeObject: currentSoundChunk
+        removeObject: currentSoundChunk2
         removeObject: currentIntensity
-       
-        selectObject: currentSound
-        currentSoundChunk = Extract part... previousTime nextTime rectangular 1 on
-        currentPitch = To Pitch... 0 mockLowerBound p0_filterUpperBound
-        fp0 [i] = Get value at time... currentTime Hertz Linear
-        removeObject: currentSoundChunk
-        removeObject: currentPitch
+
+        # selectObject: currentSound
+        # currentSoundChunk = Extract part... previousTime nextTime rectangular 1 on
+        # currentPitch = To Pitch... 0 mockLowerBound p0_filterUpperBound
+        # fp0 [i] = Get value at time... currentTime Hertz Linear
+        # removeObject: currentSoundChunk
+        # removeObject: currentPitch
+
+        # selectObject: currentSound
+        # currentSoundChunk = Extract part... previousTime nextTime rectangular 1 on
+        # selectObject: currentSoundChunk
+        # currentSoundChunk2 = Filter (pass Hann band)... p1_filterLowerBound p1_filterUpperBound 1
+        # currentIntensity = To Intensity... mockLowerBound 0 yes
+        # p1 [i] = Get maximum... previousTime nextTime sinc70
+        # removeObject: currentSoundChunk
+        # removeObject: currentIntensity
+        # removeObject: currentSoundChunk2
+
 
         selectObject: currentSound
         currentSoundChunk = Extract part... previousTime nextTime rectangular 1 on
-         currentSoundChunk = Filter (pass Hann band)... p1_filterLowerBound p1_filterUpperBound 1
-        currentIntensity = To Intensity... mockLowerBound 0 yes
-        p1 [i] = Get maximum... previousTime nextTime sinc70
-        removeObject: currentSoundChunk
-        removeObject: currentIntensity
-
-        selectObject: currentSound
-        currentSoundChunk = Extract part... previousTime nextTime rectangular 1 on
-         currentSoundChunk = Filter (pass Hann band)... a1_filterLowerBound a1_filterUpperBound 1
+        selectObject: currentSoundChunk
+        currentSoundChunk2 = Filter (pass Hann band)... a1_filterLowerBound a1_filterUpperBound 1
         currentIntensity = To Intensity... mockLowerBound 0 yes
         a1 [i] = Get maximum... previousTime nextTime sinc70
         removeObject: currentSoundChunk
         removeObject: currentIntensity
-        
-        selectObject: currentSound
-        currentSoundChunk = Extract part... previousTime nextTime rectangular 1 on
-         currentSoundChunk = Filter (pass Hann band)... a0_filterLowerBound a0_filterUpperBound 1
-        currentIntensity = To Intensity... mockLowerBound 0 yes
-        a0 [i] = Get maximum... previousTime nextTime sinc70
-        removeObject: currentSoundChunk
-        removeObject: currentIntensity
+        removeObject: currentSoundChunk2
+
+        # selectObject: currentSound
+        # currentSoundChunk = Extract part... previousTime nextTime rectangular 1 on
+        # selectObject: currentSoundChunk
+        # currentSoundChunk2 = Filter (pass Hann band)... a0_filterLowerBound a0_filterUpperBound 1
+        # currentIntensity = To Intensity... mockLowerBound 0 yes
+        # a0 [i] = Get maximum... previousTime nextTime sinc70
+        # removeObject: currentSoundChunk
+        # removeObject: currentIntensity
+        # removeObject: currentSoundChunk2
 
         selectObject: currentSound
         currentSoundChunk = Extract part... previousTime nextTime rectangular 1 on
-         currentSoundChunk = Filter (pass Hann band)... 0 1000 1
+        selectObject: currentSoundChunk
+        currentSoundChunk2 = Filter (pass Hann band)... 0 1000 1
         currentSpectrum = To Spectrum... yes
         selectObject: currentSpectrum
         std01k [i] = Get standard deviation... 2
         removeObject: currentSpectrum
         removeObject: currentSoundChunk
+        removeObject: currentSoundChunk2
 
         #Transform collected metrics into nasal cue measurements
         a1p0 [i] = a1 [i] - p0 [i]
-        a1p1 [i] = a1 [i] - p1 [i]
-        f1fp0 [i] = f1 [i] - fp0 [i]
-        a1a0 [i] = a1 [i] - a0 [i]
+        # a1p1 [i] = a1 [i] - p1 [i]
+        # f1fp0 [i] = f1 [i] - fp0 [i]
+        # a1a0 [i] = a1 [i] - a0 [i]
     endif
     endfor
 
@@ -149,9 +160,9 @@ if followingPhoneme$ = "N" or followingPhoneme$ = "M" or followingPhoneme$ = "NG
     for i from 2 to 18
     if f1 [i] <> undefined or f0 [i] <> undefined
         ddta1p0 [i] = (a1p0 [i+1] - a1p0 [i-1]) / (duration * 0.1)
-        ddta1p1 [i] = (a1p1 [i+1] - a1p1 [i-1]) / (duration * 0.1)
-        ddtf1fp0 [i] = (f1fp0 [i+1] - f1fp0 [i-1]) / (duration * 0.1)
-        ddta1a0 [i] = (a1a0 [i+1] - a1a0 [i-1]) / (duration * 0.1)
+        # ddta1p1 [i] = (a1p1 [i+1] - a1p1 [i-1]) / (duration * 0.1)
+        # ddtf1fp0 [i] = (f1fp0 [i+1] - f1fp0 [i-1]) / (duration * 0.1)
+        # ddta1a0 [i] = (a1a0 [i+1] - a1a0 [i-1]) / (duration * 0.1)
         ddtf1bw [i] = (f1bw [i+1] - f1bw [i-1]) / (duration * 0.1)
         ddtstd01k [i] = (std01k [i+1] - std01k [i-1]) / (duration * 0.1)
     endif
@@ -159,16 +170,16 @@ if followingPhoneme$ = "N" or followingPhoneme$ = "M" or followingPhoneme$ = "NG
 
     #Scan all of the currently stored derivates to find the time at which the maximum rate of change ocurred
     maxddtf1bw = 0
-    maxddta1p0 = 0
-    maxddta1p1 = 0
-    maxddtf1fp0 = 0
-    maxddta1a0 = 0
+    maxddta1p0 = 99999
+    # maxddta1p1 = 99999
+    # maxddtf1fp0 = 99999
+    # maxddta1a0 = 99999
     maxstd01k = 0
     percentagemaxddtf1bw = 0
     percentagemaxddta1p0 = 0
-    percentagemaxddta1p1 = 0
-    percentagemaxddtf1fp0 = 0
-    percentagemaxddta1a0 = 0
+    # percentagemaxddta1p1 = 0
+    # percentagemaxddtf1fp0 = 0
+    # percentagemaxddta1a0 = 0
     percentagemaxstd01k = 0
     for i from 2 to 18
     if f1 [i] <> undefined or f0 [i] <> undefined
@@ -182,39 +193,39 @@ if followingPhoneme$ = "N" or followingPhoneme$ = "M" or followingPhoneme$ = "NG
     for i from 2 to 18
     if f1 [i] <> undefined or f0 [i] <> undefined
         currentDerivative = ddta1p0 [i]
-        if currentDerivative > maxddta1p0
+        if currentDerivative < maxddta1p0
             maxddta1p0 = currentDerivative
             percentagemaxddta1p0 = 0.05 * i
         endif
     endif
     endfor
-    for i from 2 to 18
-    if f1 [i] <> undefined or f0 [i] <> undefined
-        currentDerivative = ddta1p1 [i]
-        if currentDerivative > maxddta1p1
-            maxddta1p1 = currentDerivative
-            percentagemaxddta1p1 = 0.05 * i
-        endif
-    endif
-    endfor
-    for i from 2 to 18
-    if f1 [i] <> undefined or f0 [i] <> undefined
-        currentDerivative = ddtf1fp0 [i]
-        if currentDerivative > maxddtf1fp0
-            maxddtf1fp0 = currentDerivative
-            percentagemaxddtf1fp0 = 0.05 * i
-        endif
-    endif
-    endfor
-    for i from 2 to 18
-    if f1 [i] <> undefined or f0 [i] <> undefined
-        currentDerivative = ddta1a0 [i]
-        if currentDerivative > maxddta1a0
-            maxddta1a0 = currentDerivative
-            percentagemaxddta1a0 = 0.05 * i
-        endif
-    endif
-    endfor
+    # for i from 2 to 18
+    # if f1 [i] <> undefined or f0 [i] <> undefined
+    #     currentDerivative = ddta1p1 [i]
+    #     if currentDerivative < maxddta1p1
+    #         maxddta1p1 = currentDerivative
+    #         percentagemaxddta1p1 = 0.05 * i
+    #     endif
+    # endif
+    # endfor
+    # for i from 2 to 18
+    # if f1 [i] <> undefined or f0 [i] <> undefined
+    #     currentDerivative = ddtf1fp0 [i]
+    #     if currentDerivative < maxddtf1fp0
+    #         maxddtf1fp0 = currentDerivative
+    #         percentagemaxddtf1fp0 = 0.05 * i
+    #     endif
+    # endif
+    # endfor
+    # for i from 2 to 18
+    # if f1 [i] <> undefined or f0 [i] <> undefined
+    #     currentDerivative = ddta1a0 [i]
+    #     if currentDerivative < maxddta1a0
+    #         maxddta1a0 = currentDerivative
+    #         percentagemaxddta1a0 = 0.05 * i
+    #     endif
+    # endif
+    # endfor
     for i from 2 to 18
     if f1 [i] <> undefined or f0 [i] <> undefined
         currentDerivative = ddtstd01k [i]
@@ -224,15 +235,22 @@ if followingPhoneme$ = "N" or followingPhoneme$ = "M" or followingPhoneme$ = "NG
         endif
     endif
     endfor
-    
-    onsetOfNasalization = (percentagemaxddtf1bw + percentagemaxddta1p0 + percentagemaxddta1p1 + percentagemaxddtf1fp0 + percentagemaxddta1a0 + percentagemaxstd01k) / 6
+
+    onsetOfNasalization = (percentagemaxddtf1bw + percentagemaxddta1p0 + percentagemaxstd01k) / 3
     onsetOfNasalization$ = fixed$(onsetOfNasalization, 4)
-    stdOnsetOfNasalization = sqrt((((onsetOfNasalization - percentagemaxddtf1bw) * (onsetOfNasalization - percentagemaxddtf1bw)) + ((onsetOfNasalization - percentagemaxddta1p1) * (onsetOfNasalization - percentagemaxddta1p1)) + ((onsetOfNasalization - percentagemaxddtf1fp0) * (onsetOfNasalization - percentagemaxddtf1fp0)) + ((onsetOfNasalization - percentagemaxddta1p0) * (onsetOfNasalization - percentagemaxddta1p0)) + ((onsetOfNasalization - percentagemaxddta1a0) * (onsetOfNasalization - percentagemaxddta1a0)) + ((onsetOfNasalization - percentagemaxstd01k) * (onsetOfNasalization - percentagemaxstd01k))) / 5)
-    predictionConfidence = ((-1 / (sqrt (0.3))) * stdOnsetOfNasalization) + 1
+    stdOnsetOfNasalization = sqrt((((onsetOfNasalization - percentagemaxddtf1bw) * (onsetOfNasalization - percentagemaxddtf1bw)) + ((onsetOfNasalization - percentagemaxddta1p0) * (onsetOfNasalization - percentagemaxddta1p0)) + ((onsetOfNasalization - percentagemaxstd01k) * (onsetOfNasalization - percentagemaxstd01k))) / 2)
+    disFromMean_maxddtf1bw = percentagemaxddtf1bw - onsetOfNasalization
+    disFromMean_maxddta1p0 = percentagemaxddta1p0 - onsetOfNasalization
+    disFromMean_maxstd01k = percentagemaxstd01k - onsetOfNasalization
+    disFromMean_maxddtf1bw$ = fixed$(disFromMean_maxddtf1bw, 4)
+    disFromMean_maxddta1p0$ = fixed$(disFromMean_maxddta1p0, 4)
+    disFromMean_maxstd01k$ = fixed$(disFromMean_maxstd01k, 4)
+    predictionConfidence = 1 - (stdOnsetOfNasalization / sqrt(0.375))
     predictionConfidence$ = fixed$(predictionConfidence, 4)
     percentageNasalized = 1 - onsetOfNasalization
     percentageNasalized$ = fixed$(percentageNasalized, 4)
-    appendFileLine: "C:\Users\julia\Documents\Test_SRT\Nasalization_Data.csv", thisPhoneme$,",",followingPhoneme$,",",duration$,",",percentageNasalized$,",",onsetOfNasalization$,",",predictionConfidence$,",",thisPhonemeStartTime$,",",thisPhonemeEndTime$, tab$
+    fillervariable$ = "endOfForm"
+    appendFileLine: "C:\Users\julia\Documents\Test_SRT\Nasalization_Data.csv", thisPhoneme$,",",followingPhoneme$,",",duration$,",",percentageNasalized$,",",onsetOfNasalization$,",",predictionConfidence$,",",thisPhonemeStartTime$,",",thisPhonemeEndTime$,",",disFromMean_maxddtf1bw$,",",disFromMean_maxddta1p0$,",",disFromMean_maxstd01k$,",",fillervariable$,tab$
 endif
 endif
 endif
