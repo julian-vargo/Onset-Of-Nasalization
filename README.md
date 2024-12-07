@@ -4,6 +4,3 @@
 **How to Cite**<br>
 Vargo, Julian (2024). Onset Of Nasalization Detector [Computer Software].<br>
 Department of Spanish & Portuguese. University of California, Berkeley.
-
-<br>
-On the to-do-list: I'm currently working on developing a new way to calculate bandwidth on Praat without using the "Get Bandwidth" function. Once it's finished, I expect this bandwidth measurement to be more reliable. I also plan on integrating a measurement of (F4-F3)-(F5-F4), where a lower absolute value indicates more equally spaced higher formants and a higher probability that the sound is nasal (Sundberg et al. 2007).
