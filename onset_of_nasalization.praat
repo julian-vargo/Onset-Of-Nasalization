@@ -22,9 +22,6 @@ form Onset of Nasalization - Vargo (2024)
 	integer tierNumber 2
 endform
 
-# csvName$ = "C:\Users\julia\Documents\Test_SRT\Nasalization_Data.csv"
-# inputFolder$ = "C:\Users\julia\Documents\Test_SRT\small_dataset"
-
 writeInfoLine: "Initializing Onset of Nasalization Detector"
 appendInfoLine: newline$, "Vargo, Julian (2024). Onset of Nasalization Detector [Computer Software]"
 appendInfoLine: "University of California, Berkeley. Department of Spanish & Portuguese"
