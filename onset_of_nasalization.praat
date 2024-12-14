@@ -2,7 +2,6 @@
 #Julian Vargo (2024)
 #Department of Spanish & Portuguese
 #University of California, Berkeley
-#Please enter the appropriate file paths into lines 11 and 295
 
 form Onset of Nasalization - Vargo (2024)
 	comment Welcome to the Onset of Nasalization Detector Program
